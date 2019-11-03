@@ -32,7 +32,7 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
                                          promoterMethod=c("medianbased", "rankbased"),
                                          medianThreshold,... ){
 
-  if (!promoterMethod %in% c('median', 'rank')) {
+  if (!promoterMethod %in% c('medianbased', 'rankbased')) {
     stop(paste0('Error: Invalid method type: ', promoterMethod, '! Possible values: "medianbased" or "rankbased"'))
   }
 
