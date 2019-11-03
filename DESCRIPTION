@@ -1,0 +1,19 @@
+Package: APcalc
+Type: Package
+Title: Calculate APscore 
+Version: 0.1.0
+Authors@R: as.person(c(
+    "Aditi Qamra <aditi.qamra@gmail.com> [aut, cre]"
+  ))
+Description: Estimate alternate promoter score using expression level data.
+  This package uses readcount data at promoters and calculates an AP score.
+  It also calculate association of APscore with survival.
+License: MIT + file LICENSE
+RoxygenNote: 6.1.1
+Encoding: UTF-8
+LazyData: true
+Imports:
+    dplyr,
+    survival,
+    survminer,
+    ggplot2
