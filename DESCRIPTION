@@ -3,7 +3,8 @@ Type: Package
 Title: Calculate APscore 
 Version: 0.1.0
 Authors@R: as.person(c(
-    "Aditi Qamra <aditi.qamra@gmail.com> [aut, cre]"
+    "Aditi Qamra <aditi.qamra@gmail.com> [aut, cre]",
+     "Raghav Sundar <raghav_sundar@nuhs.edu.sg> [aut]"
   ))
 Description: Estimate alternate promoter score using expression level data.
   This package uses readcount data at promoters and calculates an AP score.
