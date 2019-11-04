@@ -74,7 +74,7 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
     if (unique(tolower(promoterAnnotation)=="loss")!=FALSE){
       aploss <- promoterReadCounts[(tolower(promoterAnnotation)=="loss"),]
       aplossmedian <-  apply(aploss,1,median,na.rm = T)
-      lossscore <- as.data.frame( apply(aploss,2,function(e) if_else(e<=(apgainmedian*(1/medianThreshold)),1,0) ))
+      lossscore <- as.data.frame( apply(aploss,2,function(e) if_else(e<=(aplossmedian*(1/medianThreshold)),1,0) ))
     }
   }
 
