@@ -32,7 +32,7 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
                                          promoterMethod=c("medianbased", "rankbased"),
                                          medianThreshold,... ){
 
-  if (!promoterMethod %in% c('medianbased', 'rankbased')) {
+  if (!(promoterMethod == 'medianbased' | promoterMethod==  'rankbased')) {
     stop(paste0('Error: Invalid method type: ', promoterMethod, '! Possible values: "medianbased" or "rankbased"'))
   }
 
@@ -43,8 +43,8 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
   if (missing(promoterAnnotation)) {
     promoterAnnotation <- c(rep("gain"), nrow(promoterReadCounts))
     paste0('Setting all promoter annotations to "gain"')
-  } else if (!(is.list(promoterAnnotation))){
-    stop(paste0('Error: Invalid data type: ', promoterAnnotation, '! Possible values: "list" '))
+  } else if (!(is.vector(promoterAnnotation))){
+    stop(paste0('Error: Invalid data type: ', promoterAnnotation, '! Possible values: "character vector" '))
   } else if (length(promoterAnnotation) != nrow(promoterReadCounts) ){
     stop(paste0('Error: ', promoterAnnotation, 'does not have elements equal to nrow(', promoterReadCounts,')'  ))
   }
