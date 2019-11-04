@@ -58,7 +58,7 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
     apgain <- promoterReadCounts[(tolower(promoterAnnotation)=="gain"),]
     gainscore <- as.data.frame(t(apply(apgain,1,function(e) rank(e))))
 
-    if (unique(tolower(promoterAnnotation)=="loss")!=FALSE){
+    if ('loss' %in% tolower(promoterAnnotation)!=FALSE){
 
       aploss <- promoterReadCounts[(tolower(promoterAnnotation)=="loss"),]
       lossscore <- as.data.frame(t(apply(aploss,1,function(e) rank(e*-1))))
@@ -71,7 +71,7 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
     apgainmedian <-  apply(apgain,1,median,na.rm = T)
     gainscore <- as.data.frame( apply(apgain,2,function(e) ifelse(e>=(apgainmedian*medianThreshold),1,0) ))
 
-    if ('loss' %in% tolower(promoterAnnotation))!=FALSE){
+    if ('loss' %in% tolower(promoterAnnotation)!=FALSE){
       aploss <- promoterReadCounts[(tolower(promoterAnnotation)=="loss"),]
       aplossmedian <-  apply(aploss,1,median,na.rm = T)
       lossscore <- as.data.frame( apply(aploss,2,function(e) ifelse(e<=(aplossmedian*(1/medianThreshold)),1,0) ))
@@ -81,7 +81,7 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
   apscore <- data.frame(id=colnames(promoterReadCounts), stringsAsFactors=F)
   apscore$gainapscore <- apply(gainscore,2,sum, na.rm = T)
 
-  if ('loss' %in% tolower(promoterAnnotation))!=FALSE){
+if ('loss' %in% tolower(promoterAnnotation)!=FALSE){
       apscore$lossapscore <- apply(lossscore,2,sum, na.rm = T)
       apscore$apscore <- apscore$gainapscore + apscore$lossapscore
       apscore <- dplyr::arrange(apscore, apscore)
