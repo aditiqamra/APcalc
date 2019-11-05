@@ -7,10 +7,10 @@
 #' @param clinicaldata A data.frame object. Should have an id column labelled "id"
 #' and have survival time and event information
 #'
-#' @param alternatePromoterUpperQuantileThreshold Numeric value greater than 0 and less than 1
+#' @param alternatePromoterUpperQuantileThreshold Numeric value greater than 0 and less than 1.
 #'   Identifying threshold to define samples into APhigh and APlow.
-#'   APhigh samples will be alternatePromoterScore >= quantile(alternatePromoterScore,alternatePromoterUpperQuantileThreshold)
-#'   APlow samples will be alternatePromoterScore <= quantile(alternatePromoterScore,(1-alternatePromoterUpperQuantileThreshold))
+#'   APhigh samples will be alternatePromoterScore >= quantile(alternatePromoterScore,alternatePromoterUpperQuantileThreshold).
+#'   APlow samples will be alternatePromoterScore <= quantile(alternatePromoterScore,(1-alternatePromoterUpperQuantileThreshold)).
 
 #' @param survivalTime Column in clinicaldata specifying survival time
 #'
@@ -18,7 +18,7 @@
 #'
 #' @param title Character type. Label to plot on survival curve
 #'
-#' @return A data.frame object.Return @param alternatePromoterScore with AP group classification
+#' @return A data.frame object. Return alternatePromoterScore with AP group classification
 #' @export
 #'
 #' @examples
