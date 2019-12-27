@@ -17,11 +17,10 @@ Imports:
     dplyr,
     survival,
     survminer,
-    ggplot2
-    fread
-    rtracklayer
-    GenomicAlignments
-    genomation
-    data.table
+    ggplot2,
+    rtracklayer,
+    GenomicAlignments,
+    genomation,
+    data.table,
     stringr
     
