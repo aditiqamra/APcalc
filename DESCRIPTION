@@ -18,3 +18,10 @@ Imports:
     survival,
     survminer,
     ggplot2
+    fread
+    rtracklayer
+    GenomicAlignments
+    genomation
+    data.table
+    stringr
+    

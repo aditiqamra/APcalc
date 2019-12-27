@@ -27,6 +27,10 @@
 #'                                                          promoterMethod = "medianbased",
 #'                                                          medianThreshold = 4)
 #' }
+#' 
+#' @importFrom dplyr arrange
+
+
 
 
 calculateAlternatePromoterScore=function(promoterReadCounts,
