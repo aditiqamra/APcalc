@@ -4,19 +4,19 @@
 #'   per promoter (rows) for each sample (cols). Rownames should be promoter names
 #'
 #' @param promoterAnnotation A list with elements. Number of elements
-#'  equal to nrow \param (promoterReadCounts) and order same as \param promoterReadCounts
+#'  equal to nrow @param (promoterReadCounts) and order same as @param promoterReadCounts
 #'  indicating directionality i.e. 'gain' or 'loss'
-#'  of promoters in \param promoterReadCounts
+#'  of promoters in @param promoterReadCounts
 #'
 #' @param promoterMethod Character type.
 #'   Identifying method of AP score calculation
 #'   Can be either "medianbased" or "rankbased"
 #'
 #' @param medianThreshold A numeric value.
-#'   Specify if \param promoterMethod is equal to "medianbased"
+#'   Specify if @param promoterMethod is equal to "medianbased"
 #'
 #' @return A data.frame object. An AP score (column) calculated for each sample (rows) 
-#' using method \param promoterMethod
+#' using method @param promoterMethod
 #' @author Aditi Qamra
 #' @export
 #'

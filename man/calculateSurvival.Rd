@@ -22,13 +22,13 @@ and have survival time and event information}
 
 \item{title}{Character type. Label to plot on survival curve}
 
-\item{alternatePromoterUpperQuantileThreshold}{Numeric value greater than 0 and less than 1
+\item{alternatePromoterUpperQuantileThreshold}{Numeric value greater than 0 and less than 1.
 Identifying threshold to define samples into APhigh and APlow.
-APhigh samples will be alternatePromoterScore >= quantile(alternatePromoterScore,alternatePromoterUpperQuantileThreshold)
-APlow samples will be alternatePromoterScore <= quantile(alternatePromoterScore,(1-alternatePromoterUpperQuantileThreshold))}
+APhigh samples will be alternatePromoterScore >= quantile(alternatePromoterScore,alternatePromoterUpperQuantileThreshold).
+APlow samples will be alternatePromoterScore <= quantile(alternatePromoterScore,(1-alternatePromoterUpperQuantileThreshold)).}
 }
 \value{
-A data.frame object.Return @param alternatePromoterScore with AP group classification
+A data.frame object. Return alternatePromoterScore with AP group classification
 }
 \description{
 Given alternate promoter score for samples,

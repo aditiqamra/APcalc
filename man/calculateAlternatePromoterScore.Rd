@@ -2,7 +2,7 @@
 % Please edit documentation in R/estimate-alternatepromoter-score.R
 \name{calculateAlternatePromoterScore}
 \alias{calculateAlternatePromoterScore}
-\title{Calculate AP score given a readcount matrix and K4me3 annotation}
+\title{Calculate AP score given a readcount matrix and H3k4me3 annotation}
 \usage{
 calculateAlternatePromoterScore(promoterReadCounts, promoterAnnotation,
   promoterMethod = c("medianbased", "rankbased"), medianThreshold, ...)
@@ -12,22 +12,23 @@ calculateAlternatePromoterScore(promoterReadCounts, promoterAnnotation,
 per promoter (rows) for each sample (cols). Rownames should be promoter names}
 
 \item{promoterAnnotation}{A list with elements. Number of elements
-equal to nrow (promoterReadCounts) and order same as promoterReadCounts
+equal to nrow @param (promoterReadCounts) and order same as @param promoterReadCounts
 indicating directionality i.e. 'gain' or 'loss'
-of promoter promoterReadCounts}
+of promoters in @param promoterReadCounts}
 
 \item{promoterMethod}{Character type.
 Identifying method of AP score calculation
 Can be either "medianbased" or "rankbased"}
 
 \item{medianThreshold}{A numeric value.
-Specify if promoterMethod is equal to "medianbased"}
+Specify if @param promoterMethod is equal to "medianbased"}
 }
 \value{
-A data.frame object. An AP score (column) calculated for each sample (rows) using  @param promoterMethod
+A data.frame object. An AP score (column) calculated for each sample (rows) 
+using method @param promoterMethod
 }
 \description{
-Calculate AP score given a readcount matrix and K4me3 annotation
+Calculate AP score given a readcount matrix and H3k4me3 annotation
 }
 \examples{
 \dontrun{
@@ -36,4 +37,8 @@ alternatePromoterScore <- calculateAlternatePromoterScore(promoterReadCounts,
                                                          promoterMethod = "medianbased",
                                                          medianThreshold = 4)
 }
+
+}
+\author{
+Aditi Qamra
 }
