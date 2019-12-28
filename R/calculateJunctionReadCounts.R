@@ -54,7 +54,7 @@ calculateJunctionReadCounts <- function(junctionFile='',
   }
   
   print('Identifying 1st exon-intron junctions ')
-  junctionTable.overlap <- GenomicAlignments::findOverlaps(junctionTable, APcalc::gencode.v19.intron.first.dedup, type = 'equal')
+  junctionTable.overlap <- GenomicAlignments::findOverlaps(junctionTable, APcalc::intronRanges, type = 'equal')
   firstintronjunctionTable <- junctionTable[queryHits(junctionTable.overlap)]
   
   print('Calculating junction counts')
