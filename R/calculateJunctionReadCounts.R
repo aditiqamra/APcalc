@@ -58,7 +58,7 @@ calculateJunctionReadCounts <- function(junctionFile='',
   firstintronjunctionTable <- junctionTable[queryHits(junctionTable.overlap)]
   
   print('Calculating junction counts')
-  promoterloci <- genomation::readBed(promoterFile)
+  promoterloci <- read_bed(promoterFile)
   promoter.overlap <- GenomicAlignments::findOverlaps(promoterloci ,firstintronjunctionTable, ignore.strand=TRUE)
   promoterloci$junctionCounts <- rep(0, length(promoterloci))
   promoterloci$junctionCounts[queryHits(promoter.overlap)] <- firstintronjunctionTable$score[subjectHits(promoter.overlap)]
