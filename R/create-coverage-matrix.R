@@ -104,6 +104,7 @@ createCoverageMatrix=function(inputPath,
       colnames(promoterReadCounts)[ncol(promoterReadCounts)] <- gsub(filePattern, "", basename(files[f]))
     }
     
+    promoterReadCounts <- promoterReadCounts[!duplicated(promoterReadCounts$name), ]
     rownames(promoterReadCounts) <- promoterReadCounts$name
     promoterReadCounts$name <- NULL
     
