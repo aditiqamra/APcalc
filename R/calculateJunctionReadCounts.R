@@ -25,7 +25,7 @@
 
 calculateJunctionReadCounts <- function(junctionFile='', 
                                         junctionType,
-                                        promoterFile) {
+                                        promoterFile,gencodefile) {
 
   
   if (!junctionType %in% c('tophat', 'star')) {
@@ -58,7 +58,7 @@ calculateJunctionReadCounts <- function(junctionFile='',
   }
   
   print('Identifying 1st exon-intron junctions ')
-  junctionTable.overlap <- GenomicAlignments::findOverlaps(junctionTable, gencode.v19.intron.first.dedup, type = 'equal')
+  junctionTable.overlap <- GenomicAlignments::findOverlaps(junctionTable, gencodefile, type = 'equal')
   firstintronjunctionTable <- junctionTable[queryHits(junctionTable.overlap)]
   
   print('Calculating junction counts')
