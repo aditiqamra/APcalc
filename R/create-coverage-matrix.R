@@ -94,6 +94,7 @@ createCoverageMatrix=function(inputPath,
     # combine
     
     promoterReadCounts <- data.table::fread(files[1],sep="\t", stringsAsFactors = F, header=F, data.table=F)
+    promoterReadCounts <- promoterReadCounts[,c(1,2,3,(ncol(promoterReadCounts)-3) )]
     colnames(promoterReadCounts)[ncol(promoterReadCounts)] <- gsub(filePattern, "",basename(files[1]))
     promoterReadCounts$name <- paste(promoterReadCounts[,1], promoterReadCounts[,2], promoterReadCounts[,3], sep="_")
     promoterReadCounts <- promoterReadCounts[,c("name",  gsub(filePattern, "",basename(files[1])))]
