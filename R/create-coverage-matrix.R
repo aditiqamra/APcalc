@@ -145,7 +145,7 @@ createCoverageMatrix=function(inputPath,
     if (!missing(librarySizeFile)) {
       libsize <- read.table(librarySizeFile,sep="\t", stringsAsFactors = F, header=F)
       rownames(libsize) <- gsub(filePattern,"", libsize[,1] )
-      libsize <- libsize[colnames(promoterReadCounts_norm),]
+      libsize <- libsize[colnames(promoterReadCounts_norm),2]
       promoterReadCounts_norm <- apply(promoterReadCounts,2, function(e) e/libsize)
     } else {
       
