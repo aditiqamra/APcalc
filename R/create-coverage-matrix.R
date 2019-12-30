@@ -77,7 +77,7 @@ createCoverageMatrix=function(inputPath,
   
   
   if (junctionReads==TRUE & missing(promoterFile)) {
-    stop(paste0('Error: Input promoter file against which junction reads need to be calculated'))
+    stop(paste0('Error: Input promoter file against which junction reads need to be calculated is missing'))
   }  
 
   if (missing(normalize)) {

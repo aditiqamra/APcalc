@@ -36,7 +36,7 @@ calculateJunctionReadCounts <- function(junctionFile='',
     stop(paste0('Error: Please specify valid junction file path!'))
   }
   
-  if (is.missing(promoterFile)) {
+  if (missing(promoterFile)) {
     stop(paste0('Error: Please specify valid promoter file path!'))
   }
 
