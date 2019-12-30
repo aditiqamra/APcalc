@@ -74,6 +74,11 @@ createCoverageMatrix=function(inputPath,
   if (junctionReads==TRUE & !junctionType %in% c('tophat', 'star')) {
     stop(paste0('Error: Invalid junction type: ', junctionType, '! Possible values: "tophat" or "star"'))
   }  
+  
+  
+  if (junctionReads==TRUE & missing(promoterFile)) {
+    stop(paste0('Error: Input promoter file against which junction reads need to be calculated'))
+  }  
 
   if (missing(normalize)) {
     stop(paste0('Error: logical flag to normalize count matrix is missing' ))
