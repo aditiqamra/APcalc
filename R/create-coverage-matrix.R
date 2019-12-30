@@ -120,7 +120,7 @@ createCoverageMatrix=function(inputPath,
     
     promoterReadCounts <- as.data.frame(lapply(files,calculateJunctionReadCounts,
                                   junctionType=junctionType,
-                                 promoterFile=promoterFile))
+                                 promoterFile=promoterFile, gencodefile=gencode.v19.intron.first.dedup))
     
     colnames(promoterReadCounts) <- gsub(filePattern,"", colnames(promoterReadCounts))
   }
