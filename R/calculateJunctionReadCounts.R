@@ -43,12 +43,16 @@ calculateJunctionReadCounts <- function(junctionFile='',
   if(junctionType == 'tophat') {
     print(paste0('Reading Tophat junction files from: ', junctionFile))
     junctionTable <- readTopHatJunctions(junctionFile)
+    seqlevelsStyle(junctionTable) <- 'UCSC'
+    
     print('File loaded into memory')
     
   } else if(junctionType == 'star') {
     
     print(paste0('Reading STAR junction files from', junctionFile))
     junctionTable <- readSTARJunctions(junctionFile)
+    seqlevelsStyle(junctionTable) <- 'UCSC'
+    
     junctionTable$score <- junctionTable$um_reads  # to match the tophat style, uniquely mapped reads are used as score
     print('File loaded into memory')
   }
