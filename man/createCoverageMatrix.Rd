@@ -9,7 +9,7 @@ If the library sizes are not provided by then use sum of reads across loci as pr
 Though this is not recommended.}
 \usage{
 createCoverageMatrix(inputPath, filePattern, junctionReads, junctionType,
-  promoterFile, normalize, librarySizeFile, ...)
+  promoterFile, gencodefile, normalize, librarySizeFile, ...)
 }
 \arguments{
 \item{inputPath}{Path to coverage or junction bed files. 

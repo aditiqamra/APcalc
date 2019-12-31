@@ -5,7 +5,7 @@
 \title{Calculate sum of 1st exon-intron junction reads overlapping input promoter loci}
 \usage{
 calculateJunctionReadCounts(junctionFile = "", junctionType,
-  promoterFile)
+  promoterFile, gencodeFile)
 }
 \arguments{
 \item{junctionFile}{Path to junction files either from STAR or tophat}

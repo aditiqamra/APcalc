@@ -54,6 +54,7 @@ createCoverageMatrix=function(inputPath,
                                   junctionReads,
                                   junctionType, 
                                   promoterFile,
+                                  gencodefile,
                                   normalize,
                                   librarySizeFile,... ){
   
@@ -71,7 +72,7 @@ createCoverageMatrix=function(inputPath,
     stop(paste0('Error: logical flag specifying whether junction reads are being read in or not is missing. ' ))
   }
   
-  if (junctionReads==TRUE & !junctionType %in% c('tophat', 'star')) {
+  if (junctionReads==TRUE &  missing(junctionType)) {
     stop(paste0('Error: Invalid junction type: ', junctionType, '! Possible values: "tophat" or "star"'))
   }  
   
@@ -106,6 +107,7 @@ createCoverageMatrix=function(inputPath,
     
     for (f in 2:length(files)){
       dat <- fread(files[f],sep="\t", stringsAsFactors = F, header=F, data.table=F)
+      dat <- dat[,c(1,2,3,(ncol(dat)-3) )]
       promoterReadCounts <- cbind(promoterReadCounts, dat[,ncol(dat)])
       colnames(promoterReadCounts)[ncol(promoterReadCounts)] <- gsub(filePattern, "", basename(files[f]))
     }
@@ -120,7 +122,8 @@ createCoverageMatrix=function(inputPath,
     
     promoterReadCounts <- as.data.frame(lapply(files,calculateJunctionReadCounts,
                                   junctionType=junctionType,
-                                 promoterFile=promoterFile, gencodefile=gencode.v19.intron.first.dedup))
+                                 promoterFile=promoterFile, 
+                                 gencodeFile=gencode.v19.intron.first.dedup))
     
     colnames(promoterReadCounts) <- gsub(filePattern,"", colnames(promoterReadCounts))
   }
@@ -146,15 +149,15 @@ createCoverageMatrix=function(inputPath,
       libsize <- read.table(librarySizeFile,sep="\t", stringsAsFactors = F, header=F)
       rownames(libsize) <- gsub(filePattern,"", libsize[,1] )
       libsize <- libsize[colnames(promoterReadCounts_norm),2]
-      promoterReadCounts_norm <- apply(promoterReadCounts,2, function(e) e/libsize)
+      promoterReadCounts_norm_libsize <- as.data.frame(t(apply(promoterReadCounts_norm,1, function(e) e*1000000/libsize)))
     } else {
       
       libsize <- apply(promoterReadCounts,2, sum)
-      promoterReadCounts_norm <- as.data.frame(t(apply(promoterReadCounts_norm,1, function(e) e*1000000/libsize)))
+      promoterReadCounts_norm_libsize <- as.data.frame(t(apply(promoterReadCounts_norm,1, function(e) e*1000000/libsize)))
     }
     
     # return data frame
-    return(as.data.frame(promoterReadCounts_norm))
+    return(as.data.frame(promoterReadCounts_norm_libsize))
     
   }
  

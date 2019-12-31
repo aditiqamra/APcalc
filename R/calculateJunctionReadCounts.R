@@ -25,7 +25,8 @@
 
 calculateJunctionReadCounts <- function(junctionFile='', 
                                         junctionType,
-                                        promoterFile,gencodefile) {
+                                        promoterFile,
+                                        gencodeFile) {
 
   
   if (!junctionType %in% c('tophat', 'star')) {
@@ -58,15 +59,18 @@ calculateJunctionReadCounts <- function(junctionFile='',
   }
   
   print('Identifying 1st exon-intron junctions ')
-  junctionTable.overlap <- GenomicAlignments::findOverlaps(junctionTable, gencodefile, type = 'equal')
+  junctionTable.overlap <- GenomicAlignments::findOverlaps(junctionTable, gencodeFile, type = 'equal')
   firstintronjunctionTable <- junctionTable[queryHits(junctionTable.overlap)]
   
   print('Calculating junction counts')
-  promoterloci <- read_bed(promoterFile)
+  promoterloci <- read.table(promoterFile, header=F, sep="\t", stringsAsFactors = F)[,1:3]
+  colnames(promoterloci) <- c("chromosome","start", "end")
+  promoterloci <- makeGRangesFromDataFrame(promoterloci, starts.in.df.are.0based=TRUE)
+  
   promoter.overlap <- GenomicAlignments::findOverlaps(promoterloci ,firstintronjunctionTable, ignore.strand=TRUE)
   promoterloci$junctionCounts <- rep(0, length(promoterloci))
   promoterloci$junctionCounts[queryHits(promoter.overlap)] <- firstintronjunctionTable$score[subjectHits(promoter.overlap)]
-  promoterloci$name <- paste(seqnames(promoterloci), start(promoterloci), end(promoterloci), sep="_")
+  promoterloci$name <- paste(seqnames(promoterloci), start(promoterloci)-1, end(promoterloci), sep="_")
   junctionCounts <- data.frame(stringsAsFactors=F, 
                                junctioncount=tapply(promoterloci$junctionCounts, as.factor(promoterloci$name), sum))
   colnames(junctionCounts) <- basename(junctionFile)
