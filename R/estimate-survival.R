@@ -77,7 +77,7 @@ calculateSurvival=function(alternatePromoterScore,
   meta$apgroup <- ifelse(meta$apscore >= quantile(meta$apscore, alternatePromoterQuantileThreshold),"High",
                          ifelse(meta$apscore <= quantile(meta$apscore, (1-alternatePromoterQuantileThreshold)), "Low","Middle"))
 
-  survfitfile <- survfit(Surv(survivalTime, survivalEvent)~apgroup, data = meta)
+  survfitfile <- survfit(Surv(time=meta[,survivalTime],event=meta[,survivalEvent])~apgroup, data = meta)
   p <- survfitfile %>% ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.height = 0.34, surv.plot.height = 1, palette = "jco", title=title)
   print(p)
   return(survfitfile)
