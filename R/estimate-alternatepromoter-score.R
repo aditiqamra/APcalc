@@ -74,15 +74,18 @@ calculateAlternatePromoterScore=function(promoterReadCounts,
   } else if (promoterMethod=="medianbased"){
 
     apgain <- promoterReadCounts[(tolower(promoterAnnotation)=="gain"),]
-    apgainmedian <-  apply(apgain,1,median,na.rm = T)
+    apgainmedian <-  apply(apgain,1,median,na.rm=T)
+    apgain <- apply(apgain, 2, function(e) e/apgainmedian)
     gainscore <- as.data.frame( apply(apgain,2,function(e) 
-                    ifelse(e>=(apgainmedian*medianThreshold & e!=0),1,0) ))
+                    ifelse(e>=medianThreshold & e!=0,1,0) ))
 
     if ('loss' %in% tolower(promoterAnnotation)!=FALSE){
       aploss <- promoterReadCounts[(tolower(promoterAnnotation)=="loss"),]
-      aplossmedian <-  apply(aploss,1,median,na.rm = T)
+      aplossmedian <-  apply(aploss,1,median,na.rm=T)
+      aploss <- apply(aploss, 2, function(e) e/aplossmedian)
+      
         lossscore <- as.data.frame( apply(aploss,2,function(e) 
-                      ifelse(e<=(aplossmedian*(1/medianThreshold) & e!=0),1,0) ))
+                      ifelse(e<= (1/medianThreshold) & e!=0,1,0) ))
     }
   }
 
