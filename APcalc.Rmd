@@ -1,0 +1,363 @@
+---
+title: "APcalc"
+output: html_document
+---
+
+```{r}
+#library setup
+library(rms)
+library(survival)
+library (tidyr)
+library(dplyr)
+library(lazyeval)
+library (readr)
+library (survminer)
+library (ComplexHeatmap)
+library (ggfortify)
+library (beeswarm)
+library (stringr)
+library(reshape2)
+library(circlize)
+library(ggbiplot)
+library(ape)
+library(RColorBrewer)
+library(ggplot2)
+library(beeswarm)
+library(ggrepel)
+library(ggbeeswarm)
+library(ggrastr)
+library(treemap)
+library(igraph)
+library(data.table)
+library(APcalc)
+library(GenomicAlignments)
+setwd ("C:/Users/sundarraghav/Desktop/PhD/APIO/AP Validation/APCalc/")
+
+set.seed(20190209)
+```
+```{r}
+
+#basic read in of files/functions for all
+
+promoters <- read.table("promoterregions.txt", stringsAsFactors = F, sep="\t", header=F)
+rownames(promoters) <- promoters$V9
+
+gainscore <- function(x){if_else(x>=4,1,0)}
+lossscore <- function(x){if_else(x<=0.25&x>0,1,0)}
+
+load("C:/Users/sundarraghav/Desktop/PhD/APIO/AP Validation/APCalc/gencode.v19.intron.first.dedup.rda")
+```
+
+
+
+```{r}
+#calculate Aditi APscore for Annals
+
+annalsaditicoverage <- createCoverageMatrix(inputPath = "Annals/", 
+                                      filePattern = "_WTS.bed", 
+                                      junctionReads = F,
+                                      normalize = T, 
+                                      librarySizeFile ="Annals/annalslibsizes.txt")
+
+#calculate APscore
+
+annalsapscore <- as.data.frame(colnames(annalsaditicoverage))
+colnames(annalsapscore) <- ("id")
+
+annalsapscoremedian <- apply(annalsaditicoverage[,1:ncol(annalsaditicoverage)],1, median, na.rm = T)
+
+annalsapscoreratio <- function(x){x/annalsapscoremedian}
+
+annalsapscoreapratio <- lapply(annalsaditicoverage[,1:ncol(annalsaditicoverage)],annalsapscoreratio)%>% as.data.frame
+promoters <- promoters[rownames(annalsaditicoverage),]
+annalsapscoreapratio$dir <- promoters$V5
+
+annalsapscoreapgain <- filter(annalsapscoreapratio, dir == "gain")
+annalsapscoreaploss <- filter(annalsapscoreapratio, dir == "loss")
+
+annalsapscoreapgainscore <- as.data.frame(apply(annalsapscoreapgain[,1:ncol(annalsaditicoverage)],2,gainscore))
+
+annalsapscoreaplossscore <- as.data.frame(apply(annalsapscoreaploss[,1:ncol(annalsaditicoverage)],2,lossscore))
+
+annalsapscore$gainscore <- apply(annalsapscoreapgainscore,2,sum, na.rm = T)
+annalsapscore$lossscore <- apply(annalsapscoreaplossscore,2,sum, na.rm = T)
+annalsapscore$apscore <- annalsapscore$gainscore + annalsapscore$lossscore
+
+
+
+# Check survival
+
+clindata <- read_csv("Annals/clinicaldata.csv")
+annalsapscore <- merge(annalsapscore, clindata, by.x = "id", by.y = "coverageid")
+
+annalsapscore$apgroup <- if_else(annalsapscore$apscore > quantile(annalsapscore$apscore, 0.66), "high", "low")
+
+survfit(Surv(survtime, status)~apgroup, data = annalsapscore)%>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.height = 0.34, surv.plot.height = 1, palette = c("firebrick3","dodgerblue3"))
+
+#calculate Aditi AP score using wrapper
+
+annalsapscorewrapper <- calculateAlternatePromoterScore(annalsaditicoverage, promoters$V5, promoterMethod = "medianbased", medianThreshold = 4)
+```
+
+```{r}
+#calculate Mark APscore for Annals
+
+
+annalsmarkcoverage <- createCoverageMatrix(inputPath = "Annals/", 
+                                      filePattern = "WTS.bam.bed", 
+                                      junctionReads = T, junctionType = "tophat",
+                                      promoterFile = "promoterregions.txt",
+                                      normalize = T, 
+                                      librarySizeFile ="Annals/annalslibsizesjunctional.txt")
+
+
+#calculate APscore
+
+annalsmarkapscore <- as.data.frame(colnames(annalsmarkcoverage))
+colnames(annalsmarkapscore) <- ("id")
+
+annalsmarkapscoremedian <- apply(annalsmarkcoverage[,1:ncol(annalsmarkcoverage)],1, median, na.rm = T)
+
+annalsmarkapscoreratio <- function(x){x/annalsmarkapscoremedian}
+
+annalsmarkapscoreapratio <- lapply(annalsmarkcoverage[,1:ncol(annalsmarkcoverage)],annalsmarkapscoreratio)%>% as.data.frame
+promoters <- promoters[rownames(annalsmarkcoverage),]
+annalsmarkapscoreapratio$dir <- promoters$V5
+
+annalsmarkapscoreapgain <- filter(annalsmarkapscoreapratio, dir == "gain")
+annalsmarkapscoreaploss <- filter(annalsmarkapscoreapratio, dir == "loss")
+
+annalsmarkapscoreapgainscore <- as.data.frame(apply(annalsmarkapscoreapgain[,1:ncol(annalsmarkcoverage)],2,gainscore))
+
+annalsmarkapscoreaplossscore <- as.data.frame(apply(annalsmarkapscoreaploss[,1:ncol(annalsmarkcoverage)],2,lossscore))
+
+annalsmarkapscore$gainscore <- apply(annalsmarkapscoreapgainscore,2,sum, na.rm = T)
+annalsmarkapscore$lossscore <- apply(annalsmarkapscoreaplossscore,2,sum, na.rm = T)
+annalsmarkapscore$apscore <- annalsmarkapscore$gainscore + annalsmarkapscore$lossscore
+
+
+# Check survival
+
+clindata <- read_csv("Annals/clinicaldata.csv")
+annalsmarkapscore <- merge(annalsmarkapscore, clindata, by.x = "id", by.y = "junctionalid")
+
+annalsmarkapscore$apgroup <- if_else(annalsmarkapscore$apscore > quantile(annalsmarkapscore$apscore, 0.66), "high", "low")
+
+survfit(Surv(survtime, status)~apgroup, data = annalsmarkapscore)%>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.height = 0.34, surv.plot.height = 1, palette = c("firebrick3","dodgerblue3"))
+```
+```{r}
+#Gemini Aditi APscore
+geminiaditicoverage <- createCoverageMatrix(inputPath = "Gemini/Junctional/", 
+                                      filePattern = ".out.tab", 
+                                      junctionReads = T, junctionType = "star",
+                                      promoterFile = "promoterregions.txt",
+                                      normalize = T, 
+                                      librarySizeFile ="Gemini/Junctional/geminilibsizesjunctional.txt")
+
+```
+
+```{r}
+#Gemini Mark AP score
+
+#calculate Mark APscore for Gemini
+
+geminicoverage <- createCoverageMatrix(inputPath = "Gemini/Coverage/", 
+                                      filePattern = ".bed", 
+                                      junctionReads = F,
+                                      normalize = T, 
+                                      librarySizeFile ="Gemini/Coverage/geminilibsizes.txt")
+
+#calculate APscore
+
+geminiapscore <- as.data.frame(colnames(geminicoverage))
+colnames(geminiapscore) <- ("id")
+
+geminiapscoremedian <- apply(geminicoverage[,1:ncol(geminicoverage)],1, median, na.rm = T)
+
+geminiapscoreratio <- function(x){x/geminiapscoremedian}
+
+geminiapscoreapratio <- lapply(geminicoverage[,1:ncol(geminicoverage)],geminiapscoreratio)%>% as.data.frame
+promoters <- promoters[rownames(geminicoverage),]
+geminiapscoreapratio$dir <- promoters$V5
+
+geminiapscoreapgain <- filter(geminiapscoreapratio, dir == "gain")
+geminiapscoreaploss <- filter(geminiapscoreapratio, dir == "loss")
+
+geminiapscoreapgainscore <- as.data.frame(apply(geminiapscoreapgain[,1:ncol(geminicoverage)],2,gainscore))
+
+geminiapscoreaplossscore <- as.data.frame(apply(geminiapscoreaploss[,1:ncol(geminicoverage)],2,lossscore))
+
+geminiapscore$gainscore <- apply(geminiapscoreapgainscore,2,sum, na.rm = T)
+geminiapscore$lossscore <- apply(geminiapscoreaplossscore,2,sum, na.rm = T)
+geminiapscore$apscore <- geminiapscore$gainscore + geminiapscore$lossscore
+
+
+
+```
+
+```{r}
+#Gemini Aditi AP score
+
+#calculate aditi APscore for Gemini
+
+geminiaditicoverage <- createCoverageMatrix(inputPath = "Gemini/Coverage/", 
+                                      filePattern = ".bed", 
+                                      junctionReads = F,
+                                      normalize = T, 
+                                      librarySizeFile ="Gemini/Coverage/geminilibsizes.txt")
+```
+
+```{r}
+#y90 Mark APscore
+
+#calculate Mark APscore for y90
+
+y90coverage <- createCoverageMatrix(inputPath = "y90nivolumab/Junctional/", 
+                                      filePattern = ".out.tab", 
+                                      junctionReads = T, junctionType = "star",
+                                      promoterFile = "promoterregions.txt",
+                                      normalize = T, 
+                                      librarySizeFile ="y90nivolumab/Junctional/y90libsizesjunctional.txt")
+
+#calculate APscore
+
+y90apscore <- as.data.frame(colnames(y90coverage))
+colnames(y90apscore) <- ("id")
+
+y90apscoremedian <- apply(y90coverage[,1:ncol(y90coverage)],1, median, na.rm = T)
+
+y90apscoreratio <- function(x){x/y90apscoremedian}
+
+y90apscoreapratio <- lapply(y90coverage[,1:ncol(y90coverage)],y90apscoreratio)%>% as.data.frame
+promoters <- promoters[rownames(y90coverage),]
+y90apscoreapratio$dir <- promoters$V5
+
+y90apscoreapgain <- filter(y90apscoreapratio, dir == "gain")
+y90apscoreaploss <- filter(y90apscoreapratio, dir == "loss")
+
+y90apscoreapgainscore <- as.data.frame(apply(y90apscoreapgain[,1:ncol(y90coverage)],2,gainscore))
+
+y90apscoreaplossscore <- as.data.frame(apply(y90apscoreaploss[,1:ncol(y90coverage)],2,lossscore))
+
+y90apscore$gainscore <- apply(y90apscoreapgainscore,2,sum, na.rm = T)
+y90apscore$lossscore <- apply(y90apscoreaplossscore,2,sum, na.rm = T)
+y90apscore$apscore <- y90apscore$gainscore + y90apscore$lossscore
+
+```
+```{r}
+#y90 ADiti APscore
+
+#calculate Aditi APscore for y90
+
+#calculate Aditi APscore for y90
+
+y90aditicoverage <- createCoverageMatrix(inputPath = "y90nivolumab/Coverage/", 
+                                      filePattern = ".bed", 
+                                      junctionReads = F,
+                                      normalize = T, 
+                                      librarySizeFile ="y90nivolumab/Coverage/y90libsizes.txt")
+
+#calculate APscore
+
+y90aditiapscore <- as.data.frame(colnames(y90aditicoverage))
+colnames(y90aditiapscore) <- ("id")
+
+y90aditiapscoremedian <- apply(y90aditicoverage[,1:ncol(y90aditicoverage)],1, median, na.rm = T)
+
+y90aditiapscoreratio <- function(x){x/y90aditiapscoremedian}
+
+y90aditiapscoreapratio <- lapply(y90aditicoverage[,1:ncol(y90aditicoverage)],y90aditiapscoreratio)%>% as.data.frame
+promoters <- promoters[rownames(y90aditicoverage),]
+y90aditiapscoreapratio$dir <- promoters$V5
+
+y90aditiapscoreapgain <- filter(y90aditiapscoreapratio, dir == "gain")
+y90aditiapscoreaploss <- filter(y90aditiapscoreapratio, dir == "loss")
+
+y90aditiapscoreapgainscore <- as.data.frame(apply(y90aditiapscoreapgain[,1:ncol(y90aditicoverage)],2,gainscore))
+
+y90aditiapscoreaplossscore <- as.data.frame(apply(y90aditiapscoreaploss[,1:ncol(y90aditicoverage)],2,lossscore))
+
+y90aditiapscore$gainscore <- apply(y90aditiapscoreapgainscore,2,sum, na.rm = T)
+y90aditiapscore$lossscore <- apply(y90aditiapscoreaplossscore,2,sum, na.rm = T)
+y90aditiapscore$apscore <- y90aditiapscore$gainscore + y90aditiapscore$lossscore
+
+#correlate with survival
+
+#join with clinical id and pull out only T1 apscores first
+y90clindata <- read_csv("y90nivolumab/clinicaldata.csv")
+y90aditiapscore <- merge(y90aditiapscore, y90clindata, by.x = "id", by.y = "rnaseqid")
+
+y90aditiapscore$apgroup <- if_else(y90aditiapscore$apscore > quantile(y90aditiapscore$apscore, 0.80), "high", if_else(y90aditiapscore$apscore < quantile(y90aditiapscore$apscore, 0.20), "low", "int"))
+
+survfit(Surv(pfs, progression)~apgroup, data = y90aditiapscore)%>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.height = 0.34, surv.plot.height = 1, palette = c("firebrick3","dodgerblue3","gray84"))
+```
+```{r}
+#calculate AP score for entire Samsung cohort 
+
+samsungaditicoverage <- createCoverageMatrix(inputPath = "Samsung/Coverage/", 
+                                      filePattern = ".bed", 
+                                      junctionReads = F,
+                                      normalize = T, 
+                                      librarySizeFile ="Samsung/Coverage/samsunglibsizes.txt")
+
+#calculate APscore
+
+samsungaditiapscore <- as.data.frame(colnames(samsungaditicoverage))
+colnames(samsungaditiapscore) <- ("id")
+
+samsungaditiapscoremedian <- apply(samsungaditicoverage[,1:ncol(samsungaditicoverage)],1, median, na.rm = T)
+
+samsungaditiapscoreratio <- function(x){x/samsungaditiapscoremedian}
+
+samsungaditiapscoreapratio <- lapply(samsungaditicoverage[,1:ncol(samsungaditicoverage)],samsungaditiapscoreratio)%>% as.data.frame
+promoters <- promoters[rownames(samsungaditicoverage),]
+samsungaditiapscoreapratio$dir <- promoters$V5
+
+samsungaditiapscoreapgain <- filter(samsungaditiapscoreapratio, dir == "gain")
+samsungaditiapscoreaploss <- filter(samsungaditiapscoreapratio, dir == "loss")
+
+samsungaditiapscoreapgainscore <- as.data.frame(apply(samsungaditiapscoreapgain[,1:ncol(samsungaditicoverage)],2,gainscore))
+
+samsungaditiapscoreaplossscore <- as.data.frame(apply(samsungaditiapscoreaploss[,1:ncol(samsungaditicoverage)],2,lossscore))
+
+samsungaditiapscore$gainscore <- apply(samsungaditiapscoreapgainscore,2,sum, na.rm = T)
+samsungaditiapscore$lossscore <- apply(samsungaditiapscoreaplossscore,2,sum, na.rm = T)
+samsungaditiapscore$apscore <- samsungaditiapscore$gainscore + samsungaditiapscore$lossscore
+
+#correlate with clinical data
+
+pembrofiles <- read.csv("C:/Users/sundarraghav/Desktop/PhD/APIO/AP Validation/Retrospective validation cohorts/Y90/junction files/pembrofiles.csv")
+
+pembrofiles <- filter(pembrofiles, Group == "T" & Type != "post" & QC == "Ok")
+
+pembrofiles$id <- paste("Coverage_alternate_",pembrofiles$Sample, sep = "")
+
+samsungaditiapscoreclinical <- inner_join(samsungaditiapscore[,c(1,4)], pembrofiles[,c(2,10)], by = "id")
+
+pembroclinical <- read.csv("C:/Users/sundarraghav/Desktop/PhD/APIO/AP Validation/Retrospective validation cohorts/Y90/junction files/pembroclinical.csv")
+
+samsungaditiapscoreclinical <- merge(samsungaditiapscoreclinical, pembroclinical, by.x = "Patient_ID1", by.y = "sample")
+
+samsungaditiapscoreclinical$apgroup <- if_else(samsungaditiapscoreclinical$apscore > quantile(samsungaditiapscoreclinical$apscore, 0.20), "high", if_else(samsungaditiapscoreclinical$apscore < quantile(samsungaditiapscoreclinical$apscore, 0.80), "low", "int"))
+
+
+survfit(Surv(pfs, progression)~apgroup, data = samsungaditiapscoreclinical)%>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.height = 0.34, surv.plot.height = 1, palette = c("firebrick3","gray84","dodgerblue3"))
+
+
+```
+```{r}
+#merge samsung and y90 cohorts
+
+samsungy90 <- bind_rows(y90aditiapscore[,c(1,7,8,11)], samsungaditiapscoreclinical[,c(2,5,7,9)])
+
+survfit(Surv(pfs, progression)~apgroup, data = samsungy90)%>%
+  ggsurvplot(pval = TRUE, risk.table = TRUE, risk.table.height = 0.34, surv.plot.height = 1, palette = c("firebrick3", "gray84","dodgerblue3"))
+
+
+```
+
+
